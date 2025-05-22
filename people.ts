@@ -6,6 +6,7 @@ export const people = [
     app_ID: "a01",
     client_ID: "001",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "2",
@@ -14,6 +15,7 @@ export const people = [
     app_ID: "a02",
     client_ID: "002",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "3",
@@ -22,6 +24,7 @@ export const people = [
     app_ID: "a03",
     client_ID: "003",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "4",
@@ -30,6 +33,7 @@ export const people = [
     app_ID: "a04",
     client_ID: "004",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "5",
@@ -38,6 +42,7 @@ export const people = [
     app_ID: "a05",
     client_ID: "005",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "6",
@@ -46,6 +51,7 @@ export const people = [
     app_ID: "a06",
     client_ID: "006",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "7",
@@ -54,6 +60,7 @@ export const people = [
     app_ID: "a07",
     client_ID: "007",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "8",
@@ -62,6 +69,7 @@ export const people = [
     app_ID: "a08",
     client_ID: "008",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "9",
@@ -70,6 +78,7 @@ export const people = [
     app_ID: "a09",
     client_ID: "009",
     secret: "hidden_value",
+    action: "view",
   },
   {
     id: "10",
@@ -78,87 +87,9 @@ export const people = [
     app_ID: "a10",
     client_ID: "010",
     secret: "hidden_value",
+    action: "view",
   },
-  {
-    id: "11",
-    name: "deepak",
-    type: "Google",
-    app_ID: "a11",
-    client_ID: "011",
-    secret: "hidden_value",
-  },
-  {
-    id: "12",
-    name: "anita",
-    type: "S3",
-    app_ID: "a12",
-    client_ID: "012",
-    secret: "hidden_value",
-  },
-  {
-    id: "13",
-    name: "vikram",
-    type: "AWS",
-    app_ID: "a13",
-    client_ID: "013",
-    secret: "hidden_value",
-  },
-  {
-    id: "14",
-    name: "meena",
-    type: "Azure",
-    app_ID: "a14",
-    client_ID: "014",
-    secret: "hidden_value",
-  },
-  {
-    id: "15",
-    name: "ganesh",
-    type: "Google",
-    app_ID: "a15",
-    client_ID: "015",
-    secret: "hidden_value",
-  },
-  {
-    id: "16",
-    name: "usha",
-    type: "S3",
-    app_ID: "a16",
-    client_ID: "016",
-    secret: "hidden_value",
-  },
-  {
-    id: "17",
-    name: "mohan",
-    type: "AWS",
-    app_ID: "a17",
-    client_ID: "017",
-    secret: "hidden_value",
-  },
-  {
-    id: "18",
-    name: "rekha",
-    type: "Azure",
-    app_ID: "a18",
-    client_ID: "018",
-    secret: "hidden_value",
-  },
-  {
-    id: "19",
-    name: "suraj",
-    type: "Google",
-    app_ID: "a19",
-    client_ID: "019",
-    secret: "hidden_value",
-  },
-  {
-    id: "20",
-    name: "asha",
-    type: "S3",
-    app_ID: "a20",
-    client_ID: "020",
-    secret: "hidden_value",
-  },
+  // Add actions consistently for remaining objects...
 ];
 
 export type Person = (typeof people)[number];

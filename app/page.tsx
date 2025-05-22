@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
 
 
 export default function Home() {
   return (
    
-    <Button>Submit</Button>
+   <h1 className="text-4xl font-semibold flex items-center justify-center h-screen">Welcome to the index page</h1>
   )
 }

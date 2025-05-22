@@ -1,8 +1,10 @@
 "use client";
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { FaPlus,FaFilter } from "react-icons/fa";
 
 import {
-  buildHeaderGroups,
+  
   ColumnDef,
   flexRender,
   getCoreRowModel,
@@ -17,6 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -33,7 +37,16 @@ export function PeopleDataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
   return (
-    <div className="rounded-md border">
+  <div className="ml-8 mr-8 mb-8 font-sans">
+    <div className="mt-8 text-2xl " >
+      <h1>Credential Table</h1>
+    </div>
+    <div className="flex justify-end ">
+          <Button  className="  px-6 py-2 rounded-lg shadow-md mb-3 hover:bg-red-500 mt-3 mr-4"><FaFilter/> Filter</Button>
+         <Button   className=" px-6 py-2  rounded-lg shadow-md hover:bg-blue-500 mb-3 mt-3 " ><FaPlus/>Create</Button>
+    </div>
+   
+         <div className="rounded-md border">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => {
@@ -78,6 +91,9 @@ export function PeopleDataTable<TData, TValue>({
         </TableBody>
       </Table>
     </div>
+
+  </div>
+   
   );
 }
 
