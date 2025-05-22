@@ -16,10 +16,7 @@ const handleView = (person: Person) => {
 };
 
 export const columns: ColumnDef<Person>[] = [
-  {
-    header: "ID",
-    accessorKey: "id",
-  },
+
 
   {
     header: "Name",
