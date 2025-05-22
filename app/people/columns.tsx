@@ -1,13 +1,10 @@
-"use client"
+"use client"   
 import { ColumnDef } from "@tanstack/react-table"
 import { Person } from "@/people"
 
-const handleView = (person: Person) => {
-    alert(`Viewing details for ${person.name}`);
-};
-// const handleDot = (person:Person) => {
-//     alert(`Edit or Delete ${person.type}`)
-// }
+
+
+
 
 export const columns: ColumnDef<Person>[] =[
     {
@@ -39,22 +36,24 @@ export const columns: ColumnDef<Person>[] =[
     {
         header: 'Action',
         accessorKey:'action',
-         cell: ({ row }) => (
+         cell: ({ }) => (
             <div>
 
                 <button
-                    onClick={() => handleView(row.original)}
+                    
                     className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 >
                     View
                 </button>
+                <button
+                    
+                    className="px-3 ml-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                    . . .
+                </button>
 
-                {/* <button onClick={() => handleDot(row.orginal)} 
-                    className=" ml-4 px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                        . . .
- 
-                </button> */}
-                
+
+               
             </div>
         
     ),
