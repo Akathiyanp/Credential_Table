@@ -94,7 +94,7 @@ export function PeopleDataTable<TData, TValue>({
                   name="type"
                   className="col-span-3 border rounded px-2 py-1"
                 >
-                  <option disabled selected  >Choose one</option>
+                  
                   <option value="AWS">AWS</option>
                   <option value="S3">S3</option>
                   <option value="Azure">Azure</option>
