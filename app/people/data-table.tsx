@@ -8,6 +8,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  getPaginationRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -45,10 +46,13 @@ export function PeopleDataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
-    <div className="ml-8 mr-8 mb-8 font-sans ">
+  // table
+    <div>
+        <div className="ml-8 mr-8 mb-3 font-sans ">
       <div className="mt-8 text-2xl ">
         <h1>Credential Table</h1>
       </div>
@@ -190,6 +194,31 @@ export function PeopleDataTable<TData, TValue>({
         </Table>
       </div>
     </div>
+    {/* pagination */}
+    <div   className="flex items-center justify-start space-x-2 py-4 pl-8 ">
+      <Button variant="outline"  size='sm' onClick={()=>
+        {
+          table.previousPage()
+        }
+      }
+      disabled={!table.getCanPreviousPage()}>
+        Previous
+
+      </Button>
+       <Button variant="outline" className="ml-2" size='sm' onClick={()=>
+        {
+          table.nextPage()
+        }
+      }
+      disabled={!table.getCanNextPage()}>
+       Next
+
+      </Button>
+    </div>
+    </div>
+    
+   
+   
   );
 }
 
