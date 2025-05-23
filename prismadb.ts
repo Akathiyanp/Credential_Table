@@ -80,7 +80,11 @@ sendCredentialTable();
 
 export async function getCredentialTables() {
   await new Promise((resolve) => setTimeout(resolve, 1500));
-  return await prisma.credentialTable.findMany();
+  return await prisma.credentialTable.findMany({
+    orderBy: {
+      createdAt: "desc"
+    }
+  });
 }
 
 export async function getCredentialTable(id: string) {
@@ -125,5 +129,18 @@ export async function deleteCredentialTable(id: string) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
   return await prisma.credentialTable.delete({
     where: { id: id },
+  });
+}
+
+export async function addCredential(body){
+  const credential = await prisma.credentialTable.create({
+    data: {
+      name: body.name,
+      type: body.type,
+      appId: body.appId,
+      clientId: body.clientId,
+      secret: body.secret,
+      action: body.action ?? '', 
+    },
   });
 }

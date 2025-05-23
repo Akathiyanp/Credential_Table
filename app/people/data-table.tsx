@@ -1,12 +1,10 @@
 "use client";
 import { useState, useCallback } from "react";
-
 import { FaPlus, FaFilter } from "react-icons/fa";
-
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   flexRender,
@@ -16,7 +14,6 @@ import {
   getSortedRowModel,
   SortingState,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -25,7 +22,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import {
   Dialog,
   DialogContent,
@@ -35,7 +31,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import {
   Select,
   SelectContent,
@@ -45,11 +40,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-
 import {
   Form,
   FormControl,
@@ -58,6 +50,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { addCredential } from "@/prismadb";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -77,23 +70,24 @@ const formSchema = z.object({
   }),
 });
 
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
+
 export function PeopleDataTable<TData extends object, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [open, setOpen] = useState(false);
 
- 
-  const [tableData, setTableData] = useState<TData[]>(data);
 
   const table = useReactTable({
-    data: tableData,
+    data,    
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -114,26 +108,39 @@ export function PeopleDataTable<TData extends object, TValue>({
       secret: "",
     },
   });
+const onSubmit = useCallback(
+  async (values: z.infer<typeof formSchema>) => {
+    
+    const res = await fetch('/api/credentials', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values),
+    });
+    
+    if (res.ok) {
+    
+      const created = await res.json();
+     
+      setOpen(false);
+      form.reset();
+      router.refresh()
+    } else {
+    
+      alert("Failed to save credential");
+    }
+  },
+  []
+)
 
-  const onSubmit = useCallback(
-    async (values: z.infer<typeof formSchema>) => {
-      try {
-      
-        setTableData((prev) => [...prev, values as TData]);
-        setOpen(false);
-        form.reset();
-      } catch (error) {
-        console.error("Error creating credential:", error);
-      }
-    },
-    [form]
-  );
+  
 
   const handleDialogClose = useCallback(() => {
     setOpen(false);
     form.reset();
   }, [form]);
 
+
+  
   return (
     <div>
       <div className="ml-8 mr-8 mb-3 font-sans">
@@ -184,13 +191,13 @@ export function PeopleDataTable<TData extends object, TValue>({
                     )}
                   />
 
-                  <FormField 
+                  <FormField
                     control={form.control}
                     name="type"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Type</FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={field.onChange}
                           value={field.value}
                         >
@@ -344,6 +351,8 @@ export function PeopleDataTable<TData extends object, TValue>({
       </div>
     </div>
   );
+
+
 }
 
 export default PeopleDataTable;
