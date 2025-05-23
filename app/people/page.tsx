@@ -1,15 +1,20 @@
-"use client"
+
 import React from 'react'
 import PeopleDataTable from './data-table'
 import { columns } from './columns'
-import { people } from '@/people'
+
+import { getCredentialTables } from '@/prismadb'
 
 
 
-const People = () => {
+const  People = async () => {
+  const person= await getCredentialTables()
+  console.log(person)
+
+  
   return (
     <PeopleDataTable columns={columns}
-    data={people}></PeopleDataTable>
+    data={person}></PeopleDataTable>
   )
 }
 

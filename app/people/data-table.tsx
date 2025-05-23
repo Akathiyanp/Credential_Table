@@ -1,8 +1,12 @@
 "use client";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+
 import { FaPlus, FaFilter } from "react-icons/fa";
 
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+ 
 import {
   ColumnDef,
   flexRender,
@@ -44,7 +48,16 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -68,6 +81,11 @@ export function PeopleDataTable<TData, TValue>({
       sorting,
     },
   });
+const formSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+})
 
   return (
     // table
@@ -89,6 +107,8 @@ export function PeopleDataTable<TData, TValue>({
                 Create
               </Button>
             </DialogTrigger>
+            
+
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Create profile</DialogTitle>
@@ -246,3 +266,18 @@ export function PeopleDataTable<TData, TValue>({
 }
 
 export default PeopleDataTable;
+
+
+// Moved ProfileForm outside of PeopleDataTable to avoid modifier error
+export function ProfileForm() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+    },
+  })
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values)
+  }
+}

@@ -15,10 +15,10 @@ datasource db {
 }
 
 model CredentialTable {
-  id String @id @default(uuid())
+   id String @id @default(uuid())
   name String
   type String
-  appId String
+  appId String 
   clientId String
   secret String
   action String

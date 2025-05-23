@@ -28,11 +28,11 @@ export const columns: ColumnDef<Person>[] = [
   },
   {
     header: "App ID",
-    accessorKey: "app_ID",
+    accessorKey: "appId",
   },
   {
     header: "Client ID",
-    accessorKey: "client_ID",
+    accessorKey: "clientId",
   },
   {
     header: "Secret",
