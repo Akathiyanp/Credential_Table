@@ -1,5 +1,5 @@
 "use client";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef  } from "@tanstack/react-table";
 import { Person } from "@/people";
 import {
   DropdownMenu,
@@ -11,20 +11,100 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
+
+  
+    DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+
+
+
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
-import { useState } from "react";
+import {  useState } from "react";
 import React from "react";
 import { deleteCredential } from "@/prismadb";
 import { useRouter } from "next/navigation";
 
-// const handleView = (person: Person) => {};
+
+
+// export function PeopleDataTable<TData extends { type: string }, TValue>({
+//   tableColumns,
+//   data,
+// }: DataTableProps<TData, TValue>) {
+//   const router = useRouter();
+//   const [sorting, setSorting] = useState<SortingState>([]);
+//   const [open, setOpen] = useState(false);
+
+//   const [filterType, setFilterType] = useState<string | null>(null);
+//   const [filteredData, setFilteredData] = useState<TData[]>(data);
+
+
+// const formSchema = z.object({
+//   name: z.string().min(2, {
+//     message: "Name must be at least 2 characters.",
+//   }),
+//   type: z.string().min(1, {
+//     message: "Please select a type.",
+//   }),
+//   appId: z.string().min(1, {
+//     message: "App ID is required.",
+//   }),
+//   clientId: z.string().min(1, {
+//     message: "Client ID is required.",
+//   }),
+//   secret: z.string().min(1, {
+//     message: "Secret is required.",
+//   }),
+// });
+//  const table = useReactTable({
+//     data: filteredData,
+//     columns: tableColumns,
+//     getCoreRowModel: getCoreRowModel(),
+//     getPaginationRowModel: getPaginationRowModel(),
+//     getSortedRowModel: getSortedRowModel(),
+//     onSortingChange: setSorting,
+//     state: {
+//       sorting,
+//     },
+//   });
+
+//   const form = useForm<z.infer<typeof formSchema>>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: {
+//       name: "",
+//       type: "",
+//       appId: "",
+//       clientId: "",
+//       secret: "",
+//     },
+//   });
+//   const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
+//     const res = await fetch("/api/credentials", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(values),
+//     });
+
+//     if (res.ok) {
+//       const created = await res.json();
+
+//       setOpen(false);
+//       form.reset();
+//       router.refresh();
+//     } else {
+//       alert("Failed to save credential");
+//     }
+//   }, []);
+
+//   const handleDialogClose = useCallback(() => {
+//     setOpen(false);
+//     form.reset();
+//   }, [form]);
+
 
 export const columns: ColumnDef<Person>[] = [
   {
@@ -53,6 +133,7 @@ export const columns: ColumnDef<Person>[] = [
     cell: ({ row }) => {
       const person = row.original as Person;
 
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       const [openConfirm, setOpenConfirm] = useState(false);
 
       // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -72,6 +153,117 @@ export const columns: ColumnDef<Person>[] = [
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
+                {/* <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter credential name"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-64">
+                              <SelectValue placeholder="Choose credential type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Type</SelectLabel>
+                              <SelectItem value="aws">AWS</SelectItem>
+                              <SelectItem value="azure">Azure</SelectItem>
+                              <SelectItem value="google">Google</SelectItem>
+                              <SelectItem value="s3">S3</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="appId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>App ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter App ID" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="clientId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Client ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter Client ID" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="secret"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Secret</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Enter secret"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleDialogClose}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit">Save Credential</Button>
+                  </DialogFooter>
+                </form>
+              </Form> */}
+
                 <DialogTitle>Displaying the content</DialogTitle>
                 <DialogDescription>
                   Details of the selected person.
@@ -145,6 +337,7 @@ export const columns: ColumnDef<Person>[] = [
               className="w-40 rounded-xl border bg-white shadow-lg mt-2 p-0 mr-8 z-50"
               sideOffset={8}
             >
+                
               <DropdownMenuLabel className="px-4 py-3 font-semibold border-b">
                 Actions
               </DropdownMenuLabel>
@@ -163,4 +356,5 @@ export const columns: ColumnDef<Person>[] = [
       );
     },
   },
-];
+]
+

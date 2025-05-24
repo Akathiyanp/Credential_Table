@@ -166,7 +166,7 @@ export function PeopleDataTable<TData extends { type: string }, TValue>({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-36 rounded-md border bg-white shadow-lg mt-2 px-2 z-50 mr-14"
+              className="w-36 rounded-md border bg-white shadow-lg mt-2 px-2 z-50 mr-12"
               sideOffset={8}
             >
               <DropdownMenuLabel className="px-4 py-2 font-semibold border-b">
