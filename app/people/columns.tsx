@@ -24,7 +24,6 @@ import React from "react";
 import { deleteCredential } from "@/prismadb";
 import { useRouter } from "next/navigation";
 
-
 // const handleView = (person: Person) => {};
 
 export const columns: ColumnDef<Person>[] = [
@@ -53,13 +52,11 @@ export const columns: ColumnDef<Person>[] = [
     accessorKey: "action",
     cell: ({ row }) => {
       const person = row.original as Person;
-     
-       const  [openConfirm, setOpenConfirm] = useState(false)
-      
-     
-    
-     // eslint-disable-next-line react-hooks/rules-of-hooks
-     const router = useRouter()
+
+      const [openConfirm, setOpenConfirm] = useState(false);
+
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const router = useRouter();
 
       return (
         <div>
@@ -109,47 +106,59 @@ export const columns: ColumnDef<Person>[] = [
             </DialogContent>
           </Dialog>
 
-         <Dialog open={openConfirm} onOpenChange={setOpenConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete <span className="font-semibold">{person.name}</span>? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setOpenConfirm(false)} >
-              Cancel
-            </Button>
-            <Button variant="destructive"  onClick={() =>{
-              deleteCredential(person.id)
-              
-               setOpenConfirm(false)
-              router.refresh()}
-            }
-              >
-              OK
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          <Dialog open={openConfirm} onOpenChange={setOpenConfirm}>
+            <DialogContent className="">
+              <DialogHeader>
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete{" "}
+                  <span className="font-semibold">{person.name}</span>? This
+                  action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end gap-2 mt-4 ">
+                <Button variant="outline" onClick={() => setOpenConfirm(false)}>
+                  Cancel
+                </Button>
+                <Button className="bg-red-500 hover:bg-red-200 ml-2 "
+                 
+                  onClick={() => {
+                    deleteCredential(person.id);
 
+                    setOpenConfirm(false);
+                    router.refresh();
+                  }}
+                >
+                  OK
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-8 h-8 p-0 ml-4 bg-red-400  hover:bg-red-600">
+              <Button className="w-8 h-8 p-0 ml-4 bg-blue-500  hover:bg-blue-700">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel className="font-semibold">
+            <DropdownMenuContent
+              className="w-40 rounded-xl border bg-white shadow-lg mt-2 p-0 mr-8 z-50"
+              sideOffset={8}
+            >
+              <DropdownMenuLabel className="px-4 py-3 font-semibold border-b">
                 Actions
               </DropdownMenuLabel>
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={()=> setOpenConfirm(true)}>Delete</DropdownMenuItem>
+              <DropdownMenuItem className="px-4 py-2 text-base hover:bg-blue-100 focus:bg-blue-100 focus:outline-none transition-colors cursor-pointer">
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setOpenConfirm(true)}
+                className="px-4 py-2 text-base hover:bg-red-100 focus:bg-red-100 focus:outline-none active:bg-red-100 transition-colors cursor-pointer"
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-         
         </div>
       );
     },

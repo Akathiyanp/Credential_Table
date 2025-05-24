@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { FaPlus, FaFilter } from "react-icons/fa";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +51,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { addCredential } from "@/prismadb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import { MoreHorizontal } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -70,14 +78,12 @@ const formSchema = z.object({
   }),
 });
 
-
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-
-export function PeopleDataTable<TData extends object, TValue>({
+export function PeopleDataTable<TData extends { type: string }, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -85,9 +91,23 @@ export function PeopleDataTable<TData extends object, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [open, setOpen] = useState(false);
 
+  const [filterType, setFilterType] = useState<string | null>(null);
+  const [filteredData, setFilteredData] = useState<TData[]>(data);
+
+  useEffect(() => {
+    if (!filterType) {
+      setFilteredData(data);
+    } else {
+      setFilteredData(
+        data.filter(
+          (row) => row.type.toLowerCase() === filterType.toLowerCase()
+        )
+      );
+    }
+  }, [data, filterType]);
 
   const table = useReactTable({
-    data,    
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -108,39 +128,29 @@ export function PeopleDataTable<TData extends object, TValue>({
       secret: "",
     },
   });
-const onSubmit = useCallback(
-  async (values: z.infer<typeof formSchema>) => {
-    
-    const res = await fetch('/api/credentials', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
+    const res = await fetch("/api/credentials", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
-    
+
     if (res.ok) {
-    
       const created = await res.json();
-     
+
       setOpen(false);
       form.reset();
-      router.refresh()
+      router.refresh();
     } else {
-    
       alert("Failed to save credential");
     }
-  },
-  []
-)
-
-  
+  }, []);
 
   const handleDialogClose = useCallback(() => {
     setOpen(false);
     form.reset();
   }, [form]);
 
-
-  
   return (
     <div>
       <div className="ml-8 mr-8 mb-3 font-sans">
@@ -148,13 +158,57 @@ const onSubmit = useCallback(
           <h1>Credential Table</h1>
         </div>
         <div className="flex justify-end">
-          <Button className="px-6 py-2 rounded-lg shadow-md mb-3 hover:bg-red-500 mt-3 mr-4">
-            <FaFilter /> Filter
-          </Button>
+          {/*  */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="px-6 py-2 rounded-lg shadow-md mb-3 hover:bg-green-600 mt-3 mr-4">
+                <FaFilter /> Filter
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-36 rounded-md border bg-white shadow-lg mt-2 px-2 z-50 mr-14"
+              sideOffset={8}
+            >
+              <DropdownMenuLabel className="px-4 py-2 font-semibold border-b">
+                Actions
+              </DropdownMenuLabel>
+
+              <DropdownMenuItem
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
+                onSelect={() => setFilterType("aws")}
+              >
+                AWS
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
+                onSelect={() => setFilterType("azure")}
+              >
+                Azure
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
+                onSelect={() => setFilterType("google")}
+              >
+                Google
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
+                onSelect={() => setFilterType("s3")}
+              >
+                S3
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors text-red-500"
+                onSelect={() => setFilterType(null)}
+              >
+                Clear Filter
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="px-6 py-2 rounded-lg shadow-md mb-3 hover:bg-red-500 mt-3 mr-4">
+              <Button className="px-6 py-2 rounded-lg shadow-md mb-3 hover:bg-green-600 mt-3 mr-4">
                 <FaPlus />
                 Create
               </Button>
@@ -351,8 +405,6 @@ const onSubmit = useCallback(
       </div>
     </div>
   );
-
-
 }
 
 export default PeopleDataTable;
