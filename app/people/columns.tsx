@@ -19,6 +19,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
+import { useState } from "react";
+import React from "react";
+import { deleteCredential } from "@/prismadb";
+import { useRouter } from "next/navigation";
+
 
 // const handleView = (person: Person) => {};
 
@@ -48,6 +53,13 @@ export const columns: ColumnDef<Person>[] = [
     accessorKey: "action",
     cell: ({ row }) => {
       const person = row.original as Person;
+     
+       const  [openConfirm, setOpenConfirm] = useState(false)
+      
+     
+    
+     // eslint-disable-next-line react-hooks/rules-of-hooks
+     const router = useRouter()
 
       return (
         <div>
@@ -97,6 +109,32 @@ export const columns: ColumnDef<Person>[] = [
             </DialogContent>
           </Dialog>
 
+         <Dialog open={openConfirm} onOpenChange={setOpenConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <span className="font-semibold">{person.name}</span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setOpenConfirm(false)} >
+              Cancel
+            </Button>
+            <Button variant="destructive"  onClick={() =>{
+              deleteCredential(person.id)
+              
+               setOpenConfirm(false)
+              router.refresh()}
+            }
+              >
+              OK
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-8 h-8 p-0 ml-4 bg-red-400  hover:bg-red-600">
@@ -108,14 +146,10 @@ export const columns: ColumnDef<Person>[] = [
                 Actions
               </DropdownMenuLabel>
               <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
+              <DropdownMenuItem onClick={()=> setOpenConfirm(true)}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {/* <Button
-                        className="px-3 ml-4 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                    >
-                        . . .
-                    </Button> */}
+         
         </div>
       );
     },

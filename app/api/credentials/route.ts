@@ -1,6 +1,7 @@
 
 import { PrismaClient } from '@prisma/client';
-
+import { NextRequest, NextResponse } from 'next/server';
+import { deleteCredentialTable } from '@/prismadb';
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
@@ -16,4 +17,34 @@ export async function POST(req: Request) {
     },
   });
   return new Response(JSON.stringify(credential), { status: 201 });
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Credential ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Delete from database using your Prisma function
+    await deleteCredentialTable(id);
+
+    return NextResponse.json(
+      { message: 'Credential deleted successfully' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error deleting credential:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete credential' },
+      { status: 500 }
+    );
+  }
 }

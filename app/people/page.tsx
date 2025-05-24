@@ -3,6 +3,7 @@ import PeopleDataTable from './data-table'
 import { columns } from './columns'
 import { getCredentialTables } from '@/prismadb'
 
+
 const People = async () => {
   const person = await getCredentialTables()
   console.log(person)

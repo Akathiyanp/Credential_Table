@@ -207,7 +207,7 @@
 import { CredentialTable } from "@prisma/client"
 import { getCredentialTables } from "./prismadb"
 
-type Person = {
+export type Person = {
   id: string,
   name: string,
   type: string

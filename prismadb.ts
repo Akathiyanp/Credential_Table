@@ -1,3 +1,4 @@
+"use server"
 import { PrismaClient } from "@prisma/client";
 
 // import { people, Person } from './people';
@@ -132,7 +133,14 @@ export async function deleteCredentialTable(id: string) {
   });
 }
 
-export async function addCredential(body){
+export async function addCredential(body: {
+  name: string;
+  type: string;
+  appId: string;
+  clientId: string;
+  secret: string;
+  action?: string;
+}) {
   const credential = await prisma.credentialTable.create({
     data: {
       name: body.name,
@@ -144,3 +152,20 @@ export async function addCredential(body){
     },
   });
 }
+
+
+
+export async function deleteCredential(id: string) {
+  try {
+   await prisma.credentialTable.delete({
+      where: {
+        id: id,
+      },
+    });
+   
+  } catch (error) {
+    console.error('Error deleting credential from database:', error);
+    throw error;
+  }
+}
+
