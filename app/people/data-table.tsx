@@ -218,8 +218,9 @@ export function PeopleDataTable<TData extends { type: string }, TValue>({
               <DialogHeader>
                 <DialogTitle>Create Credential</DialogTitle>
                 <DialogDescription>
-                  Create a new credential profile here. Click save when you are
-                  done.
+                  Create a new credential profile here. 
+                  
+                  
                 </DialogDescription>
               </DialogHeader>
 

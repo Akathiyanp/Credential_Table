@@ -2,6 +2,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteCredentialTable } from '@/prismadb';
+
+
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
@@ -48,3 +50,5 @@ export async function DELETE(
     );
   }
 }
+
+

@@ -2,7 +2,6 @@
 import { PrismaClient } from "@prisma/client";
 
 
-// import { people, Person } from './people';
 
 
 const prisma = new PrismaClient();
@@ -171,3 +170,13 @@ export async function deleteCredential(id: string) {
   }
 }
 
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function updateCredential(id: string, data: any) {
+  // Implementation depends on your database setup
+  // Example with Prisma:
+  return await prisma.credentialTable.update({
+    where: { id },
+    data: data,
+  });
+}
