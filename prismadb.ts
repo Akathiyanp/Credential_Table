@@ -1,10 +1,5 @@
-"use server"
-import { PrismaClient } from "@prisma/client";
-
-
-
-
-const prisma = new PrismaClient();
+"use server";
+import { prisma } from "./prismaClient";
 
 const sendCredentialTable = async () => {
   const count = await prisma.credentialTable.count();
@@ -84,20 +79,20 @@ export async function getCredentialTables() {
   await new Promise((resolve) => setTimeout(resolve, 1500));
   return await prisma.credentialTable.findMany({
     orderBy: {
-      createdAt: "desc"
-    }
+      createdAt: "desc",
+    },
   });
 }
 
 export async function getCredentialTable(id: string) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
   return await prisma.credentialTable.findUnique({
-    where: { id:id },
+    where: { id: id },
   });
 }
 
 export async function addCredentialTable(
-    id: string,
+  id: string,
   name: string,
   type: string,
   appId: string,
@@ -112,7 +107,7 @@ export async function addCredentialTable(
 }
 
 export async function updateCredentialTable(
-    id: string,
+  id: string,
   name: string,
   type: string,
   appId: string,
@@ -149,31 +144,26 @@ export async function addCredential(body: {
       appId: body.appId,
       clientId: body.clientId,
       secret: body.secret,
-      action: body.action ?? '', 
+      action: body.action ?? "",
     },
   });
 }
 
-
-
 export async function deleteCredential(id: string) {
   try {
-   await prisma.credentialTable.delete({
+    await prisma.credentialTable.delete({
       where: {
         id: id,
       },
     });
-   
   } catch (error) {
-    console.error('Error deleting credential from database:', error);
+    console.error("Error deleting credential from database:", error);
     throw error;
   }
 }
 
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateCredential(id: string, data: any) {
- 
   return await prisma.credentialTable.update({
     where: { id },
     data: data,

@@ -7,6 +7,8 @@
       updateCredential() - Calls database function to update the record
       try, catch = Error handling
 */
+
+
 import { NextRequest, NextResponse } from "next/server";
 import { updateCredential } from "@/prismadb"; 
 export async function PUT(

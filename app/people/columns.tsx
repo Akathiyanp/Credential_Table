@@ -49,9 +49,9 @@ const formSchema = z.object({
   }),
 });
 
-// Create a separate component for the action cell
+// Separate component for the action cell, Which fixes the Invalid hook call
 const ActionCell = ({ person }: { person: Person }) => {
-  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);   
   const [openEdit, setOpenEdit] = useState(false);
   const router = useRouter();
 
@@ -66,10 +66,10 @@ const ActionCell = ({ person }: { person: Person }) => {
     },
   });
 
-  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => { //Optimizes performance
     try {
-      const res = await fetch(`/api/credentials/${person.id}`, {
-        method: "PUT", // Use PUT for updates
+      const res = await fetch(`/api/credentials/${person.id}`, { 
+        method: "PUT", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
@@ -89,7 +89,7 @@ const ActionCell = ({ person }: { person: Person }) => {
 
   const handleEditDialogClose = useCallback(() => {
     setOpenEdit(false);
-    // Reset form to original values
+   
     form.reset({
       name: person.name || "",
       type: person.type || "",
@@ -347,7 +347,7 @@ export const columns: ColumnDef<Person>[] = [
     accessorKey: "secret",
     cell: ({ row }) => {
       const person = row.original as Person;
-      return "*".repeat(person.secret?.length || 0);
+      return "*".repeat(person.secret?.length || 0); //Security Enhancement (asterisks for Secret masking)
     },
   },
   {
