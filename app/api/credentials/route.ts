@@ -35,7 +35,7 @@ export async function DELETE(
       );
     }
 
-    // Delete from database using your Prisma function
+    
     await deleteCredentialTable(id);
 
     return NextResponse.json(
