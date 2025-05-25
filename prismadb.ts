@@ -73,7 +73,7 @@ const sendCredentialTable = async () => {
   });
 };
 
-sendCredentialTable();
+// sendCredentialTable();
 
 export async function getCredentialTables() {
   await new Promise((resolve) => setTimeout(resolve, 1500));

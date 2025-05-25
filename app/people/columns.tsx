@@ -25,9 +25,24 @@ import React from "react";
 import { deleteCredential } from "@/prismadb";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -51,9 +66,10 @@ const formSchema = z.object({
 
 // Separate component for the action cell, Which fixes the Invalid hook call
 const ActionCell = ({ person }: { person: Person }) => {
-  const [openConfirm, setOpenConfirm] = useState(false);   
+  const [openConfirm, setOpenConfirm] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const router = useRouter();
+  console.log(person);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,37 +82,35 @@ const ActionCell = ({ person }: { person: Person }) => {
     },
   });
 
-  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => { //Optimizes performance
-    try {
-      const res = await fetch(`/api/credentials/${person.id}`, { 
-        method: "PUT", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof formSchema>) => {
+      //Optimizes performance
+      try {
+        const res = await fetch(`/api/credentials/${person.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        });
 
-      if (res.ok) {
-        setOpenEdit(false);
-        form.reset();
-        router.refresh();
-      } else {
+        if (res.ok) {
+          setOpenEdit(false);
+          form.reset();
+          router.refresh();
+        } else {
+          alert("Failed to update credential");
+        }
+      } catch (error) {
+        console.error("Error updating credential:", error);
         alert("Failed to update credential");
       }
-    } catch (error) {
-      console.error("Error updating credential:", error);
-      alert("Failed to update credential");
-    }
-  }, [person.id, form, router]);
+    },
+    [person.id, form, router]
+  );
 
   const handleEditDialogClose = useCallback(() => {
     setOpenEdit(false);
-   
-    form.reset({
-      name: person.name || "",
-      type: person.type || "",
-      appId: person.appId || "",
-      clientId: person.clientId || "",
-      secret: person.secret || "",
-    });
+
+    form.reset();
   }, [form, person]);
 
   const handleDelete = useCallback(async () => {
@@ -147,7 +161,9 @@ const ActionCell = ({ person }: { person: Person }) => {
                 </div>
                 <div className="py-3 flex justify-between">
                   <dt className="font-semibold text-gray-700">Secret</dt>
-                  <dd className="text-gray-900">{"*".repeat(person.secret?.length || 0)}</dd>
+                  <dd className="text-gray-900">
+                    {"*".repeat(person.secret?.length || 0)}
+                  </dd>
                 </div>
               </dl>
             </div>
