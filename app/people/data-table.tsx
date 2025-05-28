@@ -1,18 +1,18 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
-import { FaPlus, FaFilter } from "react-icons/fa";
+import { useCallback, useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { create } from "zustand";
 import {
-  ColumnDef,
+  SortingState,
   flexRender,
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
+  ColumnDef,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -50,7 +50,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { addCredential } from "@/prismadb";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,41 +57,115 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  type: z.string().min(1, {
-    message: "Please select a type.",
-  }),
-  appId: z.string().min(1, {
-    message: "App ID is required.",
-  }),
-  clientId: z.string().min(1, {
-    message: "Client ID is required.",
-  }),
-  secret: z.string().min(1, {
-    message: "Secret is required.",
-  }),
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  type: z.string().min(1, { message: "Please select a type." }),
+  appId: z.string().min(1, { message: "App ID is required." }),
+  clientId: z.string().min(1, { message: "Client ID is required." }),
+  secret: z.string().min(1, { message: "Secret is required." }),
 });
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface ModalStore<TData> {
+  isOpen: boolean;
+  sorting: SortingState;
+  filterType: string | null;
+  filteredData: TData[];
+  onOpen: () => void;
+  onClose: () => void;
+  setSorting: (
+    updater: SortingState | ((old: SortingState) => SortingState)
+  ) => void;
+  setFilterType: (filterType: string | null) => void;
+  setFilteredData: (filteredData: TData[]) => void;
+}
+
+export const createModalStore = <TData extends { type: string }>() =>
+  create<{
+    isOpen: boolean;
+    onOpen: () => void;
+    onClose: () => void;
+    sorting: SortingState;
+    setSorting: (
+      updater: SortingState | ((prev: SortingState) => SortingState)
+    ) => void;
+    filterType: string | null;
+    setFilterType: (type: string | null) => void;
+    filteredData: TData[];
+    setFilteredData: (data: TData[]) => void;
+  }>((set) => ({
+    isOpen: false,
+    onOpen: () => set({ isOpen: true }),
+    onClose: () => set({ isOpen: false }),
+    sorting: [],
+    setSorting: (updater) =>
+      set((state) => ({
+        sorting:
+          typeof updater === "function" ? updater(state.sorting) : updater,
+      })),
+    filterType: null,
+    setFilterType: (type) => set({ filterType: type }),
+    filteredData: [],
+    setFilteredData: (data) => set({ filteredData: data }),
+  }));
+
+export const useModalStore = createModalStore<{ type: string; name: string; appId: string; clientId: string; secret: string }>();
+
+interface DataTableProps<TData extends { type: string; name: string; appId: string; clientId: string; secret: string }> {
+  columns: ColumnDef<TData, unknown>[];
   data: TData[];
 }
 
-export function PeopleDataTable<TData extends { type: string }, TValue>({
+export function PeopleDataTable<TData extends { type: string; name: string; appId: string; clientId: string; secret: string }>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const router = useRouter();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [open, setOpen] = useState(false);
 
-  const [filterType, setFilterType] = useState<string | null>(null);
-  const [filteredData, setFilteredData] = useState<TData[]>(data);
+  const sorting = useModalStore((state) => state.sorting);
+  const setSorting = useModalStore((state) => state.setSorting);
+  const filterType = useModalStore((state) => state.filterType);
+  const setFilterType = useModalStore((state) => state.setFilterType);
+  const filteredData = useModalStore((state) => state.filteredData);
+  const setFilteredData = useModalStore((state) => state.setFilteredData);
+  const isOpen = useModalStore((state) => state.isOpen);
+  const onOpen = useModalStore((state) => state.onOpen);
+  const onClose = useModalStore((state) => state.onClose);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      type: "",
+      appId: "",
+      clientId: "",
+      secret: "",
+    },
+  });
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof formSchema>) => {
+      const res = await fetch("/api/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      if (res.ok) {
+        onClose();
+        form.reset();
+        router.refresh();
+      } else {
+        alert("Failed to save credential");
+      }
+    },
+    [form, onClose, router]
+  );
+
+  const handleDialogClose = useCallback(() => {
+    onClose();
+    form.reset();
+  }, [form, onClose]);
 
   useEffect(() => {
     if (!filterType) {
@@ -104,7 +177,7 @@ export function PeopleDataTable<TData extends { type: string }, TValue>({
         )
       );
     }
-  }, [data, filterType]);
+  }, [data, filterType, setFilteredData]);
 
   const table = useReactTable({
     data: filteredData,
@@ -118,39 +191,6 @@ export function PeopleDataTable<TData extends { type: string }, TValue>({
     },
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      type: "",
-      appId: "",
-      clientId: "",
-      secret: "",
-    },
-  });
-  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
-    const res = await fetch("/api/credentials", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-
-    if (res.ok) {
-      const created = await res.json();
-
-      setOpen(false);
-      form.reset();
-      router.refresh();
-    } else {
-      alert("Failed to save credential");
-    }
-  }, []);
-
-  const handleDialogClose = useCallback(() => {
-    setOpen(false);
-    form.reset();
-  }, [form]);
-
   return (
     <div>
       <div className="ml-8 mr-8 mb-3 font-sans">
@@ -158,11 +198,10 @@ export function PeopleDataTable<TData extends { type: string }, TValue>({
           <h1>Credential Table</h1>
         </div>
         <div className="flex justify-end">
-          {/*  */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="px-6 py-2 rounded-lg shadow-md mb-3 hover:bg-green-600 mt-3 mr-4">
-                <FaFilter /> Filter
+                Filter
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -175,41 +214,40 @@ export function PeopleDataTable<TData extends { type: string }, TValue>({
 
               <DropdownMenuItem
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
-                onSelect={() => setFilterType("aws")}
+                onClick={() => setFilterType("aws")}
               >
                 AWS
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
-                onSelect={() => setFilterType("azure")}
+                onClick={() => setFilterType("azure")}
               >
                 Azure
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
-                onSelect={() => setFilterType("google")}
+                onClick={() => setFilterType("google")}
               >
                 Google
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors"
-                onSelect={() => setFilterType("s3")}
+                onClick={() => setFilterType("s3")}
               >
                 S3
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none active:bg-gray-100 transition-colors text-red-500"
-                onSelect={() => setFilterType(null)}
+                onClick={() => setFilterType(null)}
               >
                 Clear Filter
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={isOpen} onOpenChange={onOpen}>
             <DialogTrigger asChild>
               <Button className="px-6 py-2 rounded-lg shadow-md mb-3 hover:bg-green-600 mt-3 mr-4">
-                <FaPlus />
                 Create
               </Button>
             </DialogTrigger>
