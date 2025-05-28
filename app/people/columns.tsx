@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/select";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { create } from "zustand";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -64,12 +65,43 @@ const formSchema = z.object({
   }),
 });
 
+// Add Zustand store: track which row is being edited or deleted
+interface ActionCellState {
+  openConfirm: boolean;
+  openEdit: boolean;
+  editingId: string | null;
+  deletingId: string | null;
+  setOpenConfirm: (value: boolean, id?: string) => void;
+  setOpenEdit: (value: boolean, id?: string) => void;
+}
+
+export const useActionCellStore = create<ActionCellState>((set) => ({
+  openConfirm: false,
+  openEdit: false,
+  editingId: null,
+  deletingId: null,
+  setOpenConfirm: (value, id) =>
+    set((state) => ({
+      openConfirm: value,
+      deletingId: value ? id ?? state.deletingId : null,
+    })),
+  setOpenEdit: (value, id) =>
+    set((state) => ({
+      openEdit: value,
+      editingId: value ? id ?? state.editingId : null,
+    })),
+}));
+
 // Separate component for the action cell, Which fixes the Invalid hook call
 const ActionCell = ({ person }: { person: Person }) => {
-  const [openConfirm, setOpenConfirm] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
+  const openConfirm = useActionCellStore((state) => state.openConfirm);
+  const setOpenConfirm = useActionCellStore((state) => state.setOpenConfirm);
+  const openEdit = useActionCellStore((state) => state.openEdit);
+  const setOpenEdit = useActionCellStore((state) => state.setOpenEdit);
+  const editingId = useActionCellStore((state) => state.editingId);
+  const deletingId = useActionCellStore((state) => state.deletingId);
   const router = useRouter();
-  console.log(person);
+  const [currentName, setCurrentName] = useState(person.name);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,9 +114,19 @@ const ActionCell = ({ person }: { person: Person }) => {
     },
   });
 
+  // Form values update when person changes ( after creating a new person )
+  React.useEffect(() => {
+    form.reset({
+      name: person.name || "",
+      type: person.type || "",
+      appId: person.appId || "",
+      clientId: person.clientId || "",
+      secret: person.secret || "",
+    });
+  }, [person, form]);
+
   const onSubmit = useCallback(
     async (values: z.infer<typeof formSchema>) => {
-      //Optimizes performance
       try {
         const res = await fetch(`/api/credentials/${person.id}`, {
           method: "PUT",
@@ -94,6 +136,7 @@ const ActionCell = ({ person }: { person: Person }) => {
 
         if (res.ok) {
           setOpenEdit(false);
+          setCurrentName(values.name); // Update the current name
           form.reset();
           router.refresh();
         } else {
@@ -104,14 +147,19 @@ const ActionCell = ({ person }: { person: Person }) => {
         alert("Failed to update credential");
       }
     },
-    [person.id, form, router]
+    [person.id, form, router, setOpenEdit]
   );
 
   const handleEditDialogClose = useCallback(() => {
     setOpenEdit(false);
-
-    form.reset();
-  }, [form, person]);
+    form.reset({
+      name: person.name || "",
+      type: person.type || "",
+      appId: person.appId || "",
+      clientId: person.clientId || "",
+      secret: person.secret || "",
+    });
+  }, [form, setOpenEdit, person]);
 
   const handleDelete = useCallback(async () => {
     try {
@@ -122,7 +170,7 @@ const ActionCell = ({ person }: { person: Person }) => {
       console.error("Error deleting credential:", error);
       alert("Failed to delete credential");
     }
-  }, [person.id, router]);
+  }, [person.id, router, setOpenConfirm]);
 
   return (
     <div className="flex items-center gap-2">
@@ -172,7 +220,10 @@ const ActionCell = ({ person }: { person: Person }) => {
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+      <Dialog
+        open={openEdit && editingId === person.id}
+        onOpenChange={(v) => setOpenEdit(v, person.id)}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Credential</DialogTitle>
@@ -285,7 +336,10 @@ const ActionCell = ({ person }: { person: Person }) => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={openConfirm} onOpenChange={setOpenConfirm}>
+      <Dialog
+        open={openConfirm && deletingId === person.id}
+        onOpenChange={(v) => setOpenConfirm(v, person.id)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
@@ -325,12 +379,12 @@ const ActionCell = ({ person }: { person: Person }) => {
           </DropdownMenuLabel>
           <DropdownMenuItem
             className="px-4 py-2 text-base hover:bg-blue-100 focus:bg-blue-100 focus:outline-none transition-colors cursor-pointer"
-            onClick={() => setOpenEdit(true)}
+            onClick={() => setOpenEdit(true, person.id)}
           >
             Edit
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => setOpenConfirm(true)}
+            onClick={() => setOpenConfirm(true, person.id)}
             className="px-4 py-2 text-base hover:bg-red-100 focus:bg-red-100 focus:outline-none active:bg-red-100 transition-colors cursor-pointer"
           >
             Delete
@@ -345,6 +399,10 @@ export const columns: ColumnDef<Person>[] = [
   {
     header: "Name",
     accessorKey: "name",
+    cell: ({ row }) => {
+      const person = row.original as Person;
+      return <div className="p-2">{person.name}</div>;
+    },
   },
   {
     header: "Type",
@@ -363,7 +421,7 @@ export const columns: ColumnDef<Person>[] = [
     accessorKey: "secret",
     cell: ({ row }) => {
       const person = row.original as Person;
-      return "*".repeat(person.secret?.length || 0); //Security Enhancement (asterisks for Secret masking)
+      return "*".repeat(person.secret?.length || 0); // Security Enhancement (asterisks for Secret masking)
     },
   },
   {

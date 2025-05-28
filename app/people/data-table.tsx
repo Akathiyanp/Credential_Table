@@ -57,6 +57,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
+import { useActionCellStore } from "./columns";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -110,17 +111,37 @@ export const createModalStore = <TData extends { type: string }>() =>
     setFilteredData: (data) => set({ filteredData: data }),
   }));
 
-export const useModalStore = createModalStore<{ type: string; name: string; appId: string; clientId: string; secret: string }>();
+export const useModalStore = createModalStore<{
+  type: string;
+  name: string;
+  appId: string;
+  clientId: string;
+  secret: string;
+}>();
 
-interface DataTableProps<TData extends { type: string; name: string; appId: string; clientId: string; secret: string }> {
+interface DataTableProps<
+  TData extends {
+    type: string;
+    name: string;
+    appId: string;
+    clientId: string;
+    secret: string;
+  }
+> {
   columns: ColumnDef<TData, unknown>[];
   data: TData[];
 }
 
-export function PeopleDataTable<TData extends { type: string; name: string; appId: string; clientId: string; secret: string }>({
-  columns,
-  data,
-}: DataTableProps<TData>) {
+export function PeopleDataTable<
+  TData extends {
+    id: string;
+    name: string;
+    type: string;
+    appId: string;
+    clientId: string;
+    secret: string;
+  }
+>({ columns, data }: DataTableProps<TData>) {
   const router = useRouter();
 
   const sorting = useModalStore((state) => state.sorting);
@@ -132,6 +153,11 @@ export function PeopleDataTable<TData extends { type: string; name: string; appI
   const isOpen = useModalStore((state) => state.isOpen);
   const onOpen = useModalStore((state) => state.onOpen);
   const onClose = useModalStore((state) => state.onClose);
+
+  const editingId = useActionCellStore((state) => state.editingId);
+  const openEdit = useActionCellStore((state) => state.openEdit);
+  const deletingId = useActionCellStore((state) => state.deletingId);
+  const openConfirm = useActionCellStore((state) => state.openConfirm);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -394,18 +420,33 @@ export function PeopleDataTable<TData extends { type: string; name: string; appI
 
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                table.getRowModel().rows.map((row) => {
+                  const person = row.original as TData;
+                  const isActive =
+                    (openEdit && editingId === person.id) ||
+                    (openConfirm && deletingId === person.id);
+                  return (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => {
+                        if (cell.column.id === "name") {
+                          let displayName = person.name;
+
+                          return (
+                            <TableCell key={cell.id}>{displayName}</TableCell>
+                          );
+                        }
+                        return (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
                   <TableCell
