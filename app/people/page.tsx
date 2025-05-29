@@ -1,10 +1,9 @@
 
 import React from 'react'
-
-import PeopleDataTable from './data-table'
-import { columns } from './columns';
+import { PeopleDataTable } from './data-table'
+import { columns } from '@/app/people/columns'
 import { getCredentialTables } from '@/prismadb'
-import DataTable from '@/data-table';
+// import DataTable from '@/data-table';
 
 
 
@@ -24,6 +23,7 @@ const People = async () => {
              <PeopleDataTable 
       columns={columns}
       data={person}
+      
     />
  
  

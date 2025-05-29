@@ -433,3 +433,40 @@ export const columns: ColumnDef<Person>[] = [
     },
   },
 ];
+
+
+// import { ColumnDef } from "@tanstack/react-table";
+// import { Person } from "@/people";
+
+
+// export const columns: ColumnDef<Person>[] = [
+//   {
+//     header: "Name",
+//     accessorKey: "name",
+//   },
+//   {
+//     header: "Type",
+//     accessorKey: "type",
+//   },
+//   {
+//     header: "App ID",
+//     accessorKey: "appId",
+//   },
+//   {
+//     header: "Client ID",
+//     accessorKey: "clientId",
+//   },
+//   {
+//     header: "Secret",
+//     accessorKey: "secret",
+//     cell: ({ row }) => {
+//       const person = row.original as Person;
+//       return "*".repeat(person.secret?.length || 0);
+//     },
+//   },
+//   {
+//     header: "Action",
+//     accessorKey: "action",
+   
+//   },
+// ];
